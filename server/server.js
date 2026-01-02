@@ -1,0 +1,111 @@
+require("dotenv").config();
+
+const express = require("express");
+const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const path = require("path"); // ✅ FIX 1
+
+// ROUTES
+const authRouter = require("./routes/auth/auth-routes");
+const adminProductsRouter = require("./routes/admin/products-routes");
+const adminOrderRouter = require("./routes/admin/order-routes");
+const adminUserRouter = require("./routes/admin/user-routes");
+const adminAnnouncementRouter = require("./routes/admin/announcement-routes");
+const adminSubscriberRouter = require("./routes/admin/subscriber-routes");
+
+const shopFavoritesRouter = require("./routes/shop/favorites-routes");
+const shopProductsRouter = require("./routes/shop/products-routes");
+const shopCartRouter = require("./routes/shop/cart-routes");
+const shopAddressRouter = require("./routes/shop/address-routes");
+const shopOrderRouter = require("./routes/shop/order-routes");
+const shopSearchRouter = require("./routes/shop/search-routes");
+const shopReviewRouter = require("./routes/shop/review-routes");
+const adminReviewRouter = require("./routes/admin/review-routes");
+
+const commonFeatureRouter = require("./routes/common/feature-routes");
+const bookingRoutes = require("./routes/booking-routes");
+
+// --------------------
+// DATABASE CONNECTION
+// --------------------
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((error) => console.log("MongoDB error:", error));
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// --------------------
+// CORS CONFIG
+// --------------------
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://mrprefectwebsitevzm.netlify.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cache-Control",
+      "Expires",
+      "Pragma",
+    ],
+  })
+);
+
+app.options("*", cors());
+
+// --------------------
+// MIDDLEWARES
+// --------------------
+app.use(cookieParser());
+app.use(express.json());
+
+// --------------------
+// ROUTES
+// --------------------
+app.use("/api/auth", authRouter);
+
+app.use("/api/admin/products", adminProductsRouter);
+app.use("/api/admin/orders", adminOrderRouter);
+app.use("/api/admin/users", adminUserRouter);
+app.use("/api/admin/announcement", adminAnnouncementRouter);
+app.use("/api/admin/subscribers", adminSubscriberRouter);
+
+app.use("/api/shop/favorites", shopFavoritesRouter);
+app.use("/api/shop/products", shopProductsRouter);
+app.use("/api/shop/cart", shopCartRouter);
+app.use("/api/shop/address", shopAddressRouter);
+app.use("/api/shop/order", shopOrderRouter);
+app.use("/api/shop/search", shopSearchRouter);
+app.use("/api/shop/review", shopReviewRouter);
+app.use("/api/admin/reviews", adminReviewRouter);
+
+app.use("/api/common/feature", commonFeatureRouter);
+
+// 🔥 BOOKING ROUTES (ONLY ONCE)
+app.use("/api/bookings", bookingRoutes);
+
+// 🔥 SERVE UPLOADED QR FILES
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// --------------------
+// SERVER START
+// --------------------
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

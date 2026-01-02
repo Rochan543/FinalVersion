@@ -1,0 +1,194 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../../models/User");
+
+// =====================
+// REGISTER
+// =====================
+const registerUser = async (req, res) => {
+  try {
+    const { userName, email, password } = req.body;
+
+    // 1. Validate input
+    if (!userName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    // 2. Check email uniqueness
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered",
+      });
+    }
+
+    // 3. Check username uniqueness
+    const existingUserName = await User.findOne({ userName });
+    if (existingUserName) {
+      return res.status(409).json({
+        success: false,
+        message: "Username already taken",
+      });
+    }
+
+    // 4. Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // 5. Create user
+    await User.create({
+      userName,
+      email,
+      password: hashedPassword,
+    });
+
+    // 6. Success response
+    res.status(201).json({
+      success: true,
+      message: "Registration successful",
+    });
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
+    // 7. Handle MongoDB duplicate key safety net
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Username or email already exists",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// =====================
+// LOGIN
+// =====================
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    // 2. Find user
+    const user = await User.findOne({ email });
+    if  (!user) {
+    return res.status(401).json({
+    success: false,
+    message: "Invalid credentials",
+  });
+}
+
+
+    // 3. Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    // 4. Create JWT
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+        userName: user.userName,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // 5. Set cookie (HTTPS + cross-domain safe)
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        success: true,
+        message: "Login successful",
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role,
+          userName: user.userName,
+        },
+      });
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// =====================
+// LOGOUT
+// =====================
+const logoutUser = (req, res) => {
+  res
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    })
+    .json({
+      success: true,
+      message: "Logged out successfully",
+    });
+};
+
+// =====================
+// AUTH MIDDLEWARE
+// =====================
+const authMiddleware = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+};
+
+// =====================
+// EXPORTS
+// =====================
+module.exports = {
+  registerUser,
+  loginUser,
+  logoutUser,
+  authMiddleware,
+};

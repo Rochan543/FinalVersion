@@ -1,0 +1,47 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  color: #2f2f2f;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+/* Same color hover for all logos */
+.logo:hover {
+  filter: drop-shadow(0 0 1.5em rgba(47, 47, 47, 0.4));
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 1.5em rgba(47, 47, 47, 0.4));
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+  color: #2f2f2f;
+}
+
+.read-the-docs {
+  color: #2f2f2f;
+}
