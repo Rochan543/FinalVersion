@@ -21,6 +21,14 @@ function ProductDetailsView({ productDetails }) {
 
   /* ================= ADD TO CART ================= */
   function handleAddToCart() {
+    if (!user?.id) {
+      toast({
+        title: "Please login to add items to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedSize) {
       toast({
         title: "Please select a size",
@@ -31,21 +39,34 @@ function ProductDetailsView({ productDetails }) {
 
     dispatch(
       addToCart({
-        userId: user._id,
+        userId: user.id, // ✅ FIXED (was user._id)
         productId: productDetails._id,
         quantity: 1,
         size: selectedSize,
       })
     ).then((res) => {
       if (res?.payload?.success) {
-        dispatch(fetchCartItems(user._id));
+        dispatch(fetchCartItems(user.id)); // ✅ FIXED
         toast({ title: "Product added to cart" });
+      } else {
+        toast({
+          title: "Failed to add product",
+          variant: "destructive",
+        });
       }
     });
   }
 
   /* ================= BOOK NOW ================= */
   function handleBookNow() {
+    if (!user?.id) {
+      toast({
+        title: "Please login to book",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedSize) {
       toast({
         title: "Please select a size",
@@ -56,18 +77,15 @@ function ProductDetailsView({ productDetails }) {
 
     dispatch(
       createBooking({
-        // 🔴 USER DATA (REQUIRED BY BACKEND)
-        userId: user._id,
+        userId: user.id, // ✅ FIXED
         userName: user.userName,
         email: user.email,
         phone: user.phone || "",
 
-        // 🔴 PRODUCT DATA (REQUIRED BY BACKEND)
         productId: productDetails._id,
         productName: productDetails.title,
         productImage: productDetails.image,
 
-        // 🔴 BOOKING DATA
         size: selectedSize,
       })
     ).then((res) => {
@@ -77,8 +95,7 @@ function ProductDetailsView({ productDetails }) {
           description: "Admin will contact you for payment",
         });
 
-        // 🔴 THIS MAKES USER PANEL UPDATE
-        dispatch(fetchUserBookings(user._id));
+        dispatch(fetchUserBookings(user.id)); // ✅ FIXED
       } else {
         toast({
           title: "Booking failed",
@@ -161,25 +178,23 @@ function ProductDetailsView({ productDetails }) {
         </Button>
 
         {/* CONTACT OPTIONS */}
-        {/* CALL & WHATSAPP SIDE BY SIDE */}
-          <div className="flex gap-3 mt-2">
-            <a
-              href="tel:+919999999999"
-              className="flex-1 text-center text-sm font-medium border border-blue-600 text-blue-600 py-2 rounded-md hover:bg-blue-50 transition"
-            >
-              Call to Book
-            </a>
+        <div className="flex gap-3 mt-2">
+          <a
+            href="tel:+919999999999"
+            className="flex-1 text-center text-sm font-medium border border-blue-600 text-blue-600 py-2 rounded-md hover:bg-blue-50 transition"
+          >
+            Call to Book
+          </a>
 
-            <a
-              href={`https://wa.me/919999999999?text=Hi, I want to book ${productDetails.title}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 text-center text-sm font-medium border border-green-600 text-green-600 py-2 rounded-md hover:bg-green-50 transition"
-            >
-              WhatsApp to Book
-            </a>
-          </div>
-
+          <a
+            href={`https://wa.me/919999999999?text=Hi, I want to book ${productDetails.title}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 text-center text-sm font-medium border border-green-600 text-green-600 py-2 rounded-md hover:bg-green-50 transition"
+          >
+            WhatsApp to Book
+          </a>
+        </div>
       </div>
     </div>
   );

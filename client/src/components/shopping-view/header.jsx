@@ -31,7 +31,7 @@ import { useEffect, useState } from "react";
 import { fetchCartItems } from "@/store/shop/cart-slice";
 import { Label } from "../ui/label";
 
-/* ---------------- MENU ITEMS (UNCHANGED) ---------------- */
+/* ---------------- MENU ITEMS ---------------- */
 
 function MenuItems() {
   const navigate = useNavigate();
@@ -57,12 +57,12 @@ function MenuItems() {
   }
 
   return (
-    <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-6 lg:flex-row">
+    <nav className="flex flex-col mb-3 lg:mb-0 lg:flex-row lg:items-center gap-6">
       {shoppingViewHeaderMenuItems.map((menuItem) => (
         <Label
           key={menuItem.id}
           onClick={() => handleNavigate(menuItem)}
-          className="text-sm font-medium cursor-pointer text-white hover:text-gray-300 transition-colors"
+          className="text-sm font-medium cursor-pointer text-white hover:text-[#d4af37] transition-colors"
         >
           {menuItem.label}
         </Label>
@@ -71,7 +71,7 @@ function MenuItems() {
   );
 }
 
-/* ---------------- RIGHT CONTENT (UNCHANGED) ---------------- */
+/* ---------------- RIGHT CONTENT ---------------- */
 
 function HeaderRightContent() {
   const { user } = useSelector((state) => state.auth);
@@ -93,28 +93,30 @@ function HeaderRightContent() {
   }, [dispatch, user?.id]);
 
   return (
-    <div className="flex lg:items-center lg:flex-row flex-col gap-4">
+    <div className="flex lg:flex-row flex-col lg:items-center gap-4">
+      {/* FAVORITES */}
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate("/shop/favorites")}
-        className="relative text-white hover:bg-transparent focus-visible:ring-0"
+        className="relative text-[#d4af37] hover:bg-transparent focus-visible:ring-0"
       >
         <Heart className="w-6 h-6" />
-        <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
+        <span className="absolute -top-1 right-1 text-xs font-bold">
           {favorites?.length || 0}
         </span>
       </Button>
 
+      {/* CART */}
       <Sheet open={openCartSheet} onOpenChange={setOpenCartSheet}>
         <Button
           onClick={() => setOpenCartSheet(true)}
           variant="ghost"
           size="icon"
-          className="relative text-white hover:bg-transparent focus-visible:ring-0"
+          className="relative text-[#d4af37] hover:bg-transparent focus-visible:ring-0"
         >
           <ShoppingCart className="w-6 h-6" />
-          <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
+          <span className="absolute -top-1 right-1 text-xs font-bold">
             {cartItems?.items?.length || 0}
           </span>
         </Button>
@@ -125,10 +127,11 @@ function HeaderRightContent() {
         />
       </Sheet>
 
+      {/* PROFILE */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Avatar className="bg-gray-800">
-            <AvatarFallback className="bg-gray-800 text-white font-extrabold">
+          <Avatar className="bg-[#2a1c15] border-none">
+            <AvatarFallback className="bg-[#2a1c15] text-[#d4af37] font-extrabold">
               {user?.userName?.[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -166,32 +169,34 @@ function HeaderRightContent() {
 function ShoppingHeader() {
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
-  /* ✅ AUTO-CLOSE MOBILE MENU ON DESKTOP RESIZE */
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setOpenMobileMenu(false);
       }
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-700 bg-[#111827]">
+    <header className="sticky top-0 z-40 w-full border-b border-[#3a2a1d] bg-[#2a1c15]">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-
         {/* LOGO */}
         <Link to="/shop/home" className="flex items-center gap-3">
           <img
             src="/logo.jpeg"
-            alt="Mr.Prefect Logo"
-            className="h-8 w-8 object-contain"
+            alt="Mr Perfect Logo"
+            className="h-10 w-10 rounded-full object-cover border-none bg-transparent"
           />
-          <span className="font-semibold tracking-wide text-white">
-            Mr.Prefect
-          </span>
+          <div className="leading-tight">
+            <span className="block text-white font-semibold">
+              Mr. Perfect
+            </span>
+            <span className="block text-xs text-[#d4af37]">
+              Fashion Club
+            </span>
+          </div>
         </Link>
 
         {/* MOBILE MENU */}
@@ -201,16 +206,15 @@ function ShoppingHeader() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white hover:bg-transparent focus-visible:ring-0"
+                className="text-[#d4af37] hover:bg-transparent focus-visible:ring-0"
               >
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle header menu</span>
               </Button>
             </SheetTrigger>
 
             <SheetContent
               side="left"
-              className="w-full max-w-xs bg-[#111827] text-white"
+              className="w-full max-w-xs bg-[#2a1c15] text-white"
             >
               <MenuItems />
               <HeaderRightContent />

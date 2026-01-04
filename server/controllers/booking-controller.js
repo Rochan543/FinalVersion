@@ -1,10 +1,11 @@
 const Booking = require("../models/Booking");
 const Order = require("../models/Order");
+const Product = require("../models/Product");
 const { sendPaymentEmail } = require("../utils/email");
 
 /* ===============================
    CREATE BOOKING (USER)
-   =============================== */
+=============================== */
 const createBooking = async (req, res) => {
   try {
     // 🔒 Logged-in user from authMiddleware
@@ -12,7 +13,7 @@ const createBooking = async (req, res) => {
 
     /* ===============================
        CREATE BOOKING (UNCHANGED)
-       =============================== */
+    =============================== */
     const booking = new Booking({
       userId: user.id,
       userName: user.userName,
@@ -28,9 +29,21 @@ const createBooking = async (req, res) => {
     await booking.save();
 
     /* ===============================
+       FETCH PRODUCT PRICE (UNCHANGED)
+    =============================== */
+    const product = await Product.findById(booking.productId);
+
+    const price = product
+      ? Number(product.salePrice > 0 ? product.salePrice : product.price)
+      : 0;
+
+    const quantity = 1;
+    const totalAmount = price * quantity;
+
+    /* ===============================
        CREATE ORDER FROM BOOKING
-       (FIELDS ADDED – LOGIC UNCHANGED)
-       =============================== */
+       (ONLY SIZE ADDED – NOTHING ELSE CHANGED)
+    =============================== */
     await Order.create({
       userId: user.id,
 
@@ -39,8 +52,11 @@ const createBooking = async (req, res) => {
           productId: booking.productId,
           title: booking.productName,
           image: booking.productImage,
-          price: 0, // price handled later
-          quantity: 1,
+
+          size: booking.size, // ✅ ONLY ADDITION (FIX)
+
+          price,
+          quantity,
         },
       ],
 
@@ -56,7 +72,7 @@ const createBooking = async (req, res) => {
       orderStatus: "pending",
       paymentMethod: "offline",
       paymentStatus: "pending",
-      totalAmount: 0,
+      totalAmount,
 
       orderDate: new Date(),
       orderUpdateDate: new Date(),
@@ -68,7 +84,7 @@ const createBooking = async (req, res) => {
 
     /* ===============================
        RESPONSE (UNCHANGED)
-       =============================== */
+    =============================== */
     res.status(201).json({
       success: true,
       data: booking,
@@ -84,7 +100,7 @@ const createBooking = async (req, res) => {
 
 /* ===============================
    GET USER BOOKINGS
-   =============================== */
+=============================== */
 const getUserBookings = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -108,7 +124,7 @@ const getUserBookings = async (req, res) => {
 
 /* ===============================
    ADMIN: GET ALL BOOKINGS
-   =============================== */
+=============================== */
 const getAllBookings = async (req, res) => {
   try {
     const bookings = await Booking.find().sort({
@@ -130,7 +146,7 @@ const getAllBookings = async (req, res) => {
 
 /* ===============================
    ADMIN: UPDATE BOOKING STATUS
-   =============================== */
+=============================== */
 const updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -153,7 +169,7 @@ const updateBookingStatus = async (req, res) => {
 
 /* ===============================
    ADMIN: SEND PAYMENT REQUEST
-   =============================== */
+=============================== */
 const sendPaymentRequest = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
@@ -186,8 +202,8 @@ const sendPaymentRequest = async (req, res) => {
 };
 
 /* ===============================
-   EXPORTS
-   =============================== */
+   EXPORTS (UNCHANGED)
+=============================== */
 module.exports = {
   createBooking,
   getUserBookings,

@@ -183,6 +183,20 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
+
+// =====================
+// ADMIN MIDDLEWARE
+// =====================
+const adminMiddleware = (req, res, next) => {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access only",
+    });
+  }
+  next();
+};
+
 // =====================
 // EXPORTS
 // =====================
@@ -191,4 +205,5 @@ module.exports = {
   loginUser,
   logoutUser,
   authMiddleware,
+  adminMiddleware, // ✅ ADDED
 };

@@ -24,17 +24,28 @@ function UserCartWrapper({ cartItems, setOpenCartSheet }) {
       <SheetHeader>
         <SheetTitle>Your Cart</SheetTitle>
       </SheetHeader>
+
       <div className="mt-8 space-y-4">
         {cartItems && cartItems.length > 0
-          ? cartItems.map((item) => <UserCartItemsContent cartItem={item} />)
+          ? cartItems.map((item) => (
+              <UserCartItemsContent key={item.productId} cartItem={item} />
+            ))
           : null}
       </div>
+
       <div className="mt-8 space-y-4">
         <div className="flex justify-between">
           <span className="font-bold">Total</span>
-          <span className="font-bold">${totalCartAmount}</span>
+
+          {/* ✅ ALWAYS SHOW INR */}
+          <span className="font-bold">
+            ₹{totalCartAmount
+              .toString()
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          </span>
         </div>
       </div>
+
       <Button
         onClick={() => {
           navigate("/shop/checkout");

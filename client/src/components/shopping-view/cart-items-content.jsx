@@ -73,7 +73,7 @@ function UserCartItemsContent({ cartItem }) {
     });
   }
 
-  /* ✅ SAFE CALCULATION */
+  /* ✅ SAFE INR TOTAL (NO DOLLAR, NO LOCALE DEPENDENCY) */
   const itemTotal =
     (cartItem?.salePrice > 0
       ? cartItem?.salePrice
@@ -115,9 +115,9 @@ function UserCartItemsContent({ cartItem }) {
       </div>
 
       <div className="flex flex-col items-end">
-        {/* ✅ INR FORMATTED */}
+        {/* ✅ ALWAYS RUPEES */}
         <p className="font-semibold">
-          ₹{itemTotal.toLocaleString("en-IN")}
+          ₹{itemTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
         </p>
 
         <Trash

@@ -1,19 +1,45 @@
 const User = require("../../models/User");
 const Order = require("../../models/Order");
+const Address = require("../../models/Address"); // ✅ ADD
 
 /**
- * GET ALL USERS (ADMIN)
+ * GET ALL USERS (ADMIN) – WITH ADDRESS
  */
 const getAllUsersForAdmin = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }).select("-password");
+    // 1️⃣ Fetch all users (excluding password)
+    const users = await User.find({ role: "user" })
+      .select("-password")
+      .lean();
+
+    // 2️⃣ Attach latest address for each user
+    const usersWithAddress = await Promise.all(
+      users.map(async (user) => {
+        const address = await Address.findOne({ userId: user._id })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        return {
+          ...user,
+          phone: address?.phone || "",
+          address: address
+            ? {
+                address: address.address || "",
+                city: address.city || "",
+                pincode: address.pincode || "",
+                notes: address.notes || "",
+              }
+            : null,
+        };
+      })
+    );
 
     res.status(200).json({
       success: true,
-      data: users,
+      data: usersWithAddress,
     });
   } catch (e) {
-    console.log(e);
+    console.error("GET USERS ADMIN ERROR:", e);
     res.status(500).json({
       success: false,
       message: "Some error occurred!",
@@ -42,7 +68,7 @@ const getOrdersByUserIdForAdmin = async (req, res) => {
       data: orders,
     });
   } catch (e) {
-    console.log(e);
+    console.error("GET USER ORDERS ADMIN ERROR:", e);
     res.status(500).json({
       success: false,
       message: "Some error occurred!",
@@ -51,7 +77,7 @@ const getOrdersByUserIdForAdmin = async (req, res) => {
 };
 
 /**
- * DELETE USER (ADMIN) ✅ NEW
+ * DELETE USER (ADMIN)
  */
 const deleteUserForAdmin = async (req, res) => {
   try {
@@ -81,7 +107,7 @@ const deleteUserForAdmin = async (req, res) => {
       message: "User deleted successfully",
     });
   } catch (e) {
-    console.log(e);
+    console.error("DELETE USER ADMIN ERROR:", e);
     res.status(500).json({
       success: false,
       message: "Failed to delete user",
@@ -92,5 +118,5 @@ const deleteUserForAdmin = async (req, res) => {
 module.exports = {
   getAllUsersForAdmin,
   getOrdersByUserIdForAdmin,
-  deleteUserForAdmin, // ✅ EXPORTED
+  deleteUserForAdmin,
 };

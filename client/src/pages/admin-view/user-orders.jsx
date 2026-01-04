@@ -32,10 +32,10 @@ function AdminUserOrders() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* ================= HEADER ================= */}
       <div>
-        <h1 className="text-2xl font-bold">User Orders</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">User Orders</h1>
         <p className="text-sm text-muted-foreground">
           All orders placed by the selected user
         </p>
@@ -45,27 +45,29 @@ function AdminUserOrders() {
       {orders.map((order) => (
         <Card key={order._id}>
           <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Order ID</p>
-              <p className="font-mono text-sm">{order._id}</p>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Order ID</p>
+              <p className="font-mono text-xs sm:text-sm break-all">
+                {order._id}
+              </p>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Badge
-                variant={
+                className={
                   order.orderStatus === "delivered"
-                    ? "success"
-                    : "secondary"
+                    ? "bg-green-600"
+                    : "bg-gray-700"
                 }
               >
                 {order.orderStatus}
               </Badge>
 
               <Badge
-                variant={
+                className={
                   order.paymentStatus === "paid"
-                    ? "success"
-                    : "destructive"
+                    ? "bg-green-600"
+                    : "bg-red-600"
                 }
               >
                 {order.paymentStatus}
@@ -73,38 +75,51 @@ function AdminUserOrders() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             {/* -------- SUMMARY -------- */}
-            <div className="flex flex-wrap gap-6 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
               <div>
                 <p className="text-muted-foreground">Total Amount</p>
                 <p className="font-semibold text-lg">
                   ₹{order.totalAmount}
                 </p>
               </div>
+
+              <div>
+                <p className="text-muted-foreground">Order Date</p>
+                <p>
+                  {order.orderDate?.split("T")[0]}
+                </p>
+              </div>
             </div>
 
             {/* -------- ITEMS -------- */}
-            <div className="space-y-4">
-              {order.cartItems.map((item) => (
+            <div className="space-y-3">
+              {order.cartItems.map((item, index) => (
                 <div
-                  key={item.productId}
-                  className="flex gap-4 items-center border rounded-lg p-3"
+                  key={`${item.productId}-${index}`}
+                  className="flex flex-col sm:flex-row gap-4 sm:items-center border rounded-lg p-3"
                 >
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="h-16 w-16 object-cover rounded"
+                    className="h-20 w-20 object-cover rounded self-start"
                   />
 
-                  <div className="flex-1">
+                  <div className="flex-1 space-y-1">
                     <p className="font-medium">{item.title}</p>
+
                     <p className="text-sm text-muted-foreground">
                       Quantity: {item.quantity}
                     </p>
+
+                    {/* ✅ SIZE DISPLAY (FIXED) */}
+                    <p className="text-sm text-muted-foreground">
+                      Size: {item.size ? item.size : "-"}
+                    </p>
                   </div>
 
-                  <div className="font-semibold">
+                  <div className="font-semibold text-base sm:text-lg">
                     ₹{item.price}
                   </div>
                 </div>

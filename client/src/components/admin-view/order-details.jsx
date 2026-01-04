@@ -22,22 +22,21 @@ function AdminOrderDetailsView({ orderDetails }) {
   const dispatch = useDispatch();
   const { toast } = useToast();
 
-  console.log(orderDetails, "orderDetailsorderDetails");
-
   function handleUpdateStatus(event) {
     event.preventDefault();
     const { status } = formData;
 
     dispatch(
-      updateOrderStatus({ id: orderDetails?._id, orderStatus: status })
+      updateOrderStatus({
+        id: orderDetails?._id,
+        orderStatus: status,
+      })
     ).then((data) => {
       if (data?.payload?.success) {
         dispatch(getOrderDetailsForAdmin(orderDetails?._id));
         dispatch(getAllOrdersForAdmin());
         setFormData(initialFormData);
-        toast({
-          title: data?.payload?.message,
-        });
+        toast({ title: data?.payload?.message });
       }
     });
   }
@@ -45,27 +44,40 @@ function AdminOrderDetailsView({ orderDetails }) {
   return (
     <DialogContent className="sm:max-w-[600px]">
       <div className="grid gap-6">
+        {/* ================= ORDER META ================= */}
         <div className="grid gap-2">
           <div className="flex mt-6 items-center justify-between">
             <p className="font-medium">Order ID</p>
             <Label>{orderDetails?._id}</Label>
           </div>
+
           <div className="flex mt-2 items-center justify-between">
             <p className="font-medium">Order Date</p>
-            <Label>{orderDetails?.orderDate.split("T")[0]}</Label>
+            <Label>
+              {orderDetails?.orderDate?.split("T")[0]}
+            </Label>
           </div>
+
           <div className="flex mt-2 items-center justify-between">
             <p className="font-medium">Order Price</p>
-            <Label>${orderDetails?.totalAmount}</Label>
+            <Label>
+              ₹
+              {Number(orderDetails?.totalAmount || 0).toLocaleString(
+                "en-IN"
+              )}
+            </Label>
           </div>
+
           <div className="flex mt-2 items-center justify-between">
             <p className="font-medium">Payment method</p>
             <Label>{orderDetails?.paymentMethod}</Label>
           </div>
+
           <div className="flex mt-2 items-center justify-between">
             <p className="font-medium">Payment Status</p>
             <Label>{orderDetails?.paymentStatus}</Label>
           </div>
+
           <div className="flex mt-2 items-center justify-between">
             <p className="font-medium">Order Status</p>
             <Label>
@@ -83,23 +95,53 @@ function AdminOrderDetailsView({ orderDetails }) {
             </Label>
           </div>
         </div>
+
         <Separator />
+
+        {/* ================= ORDER ITEMS ================= */}
         <div className="grid gap-4">
           <div className="grid gap-2">
             <div className="font-medium">Order Details</div>
+
             <ul className="grid gap-3">
-              {orderDetails?.cartItems && orderDetails?.cartItems.length > 0
-                ? orderDetails?.cartItems.map((item) => (
-                    <li className="flex items-center justify-between">
-                      <span>Title: {item.title}</span>
-                      <span>Quantity: {item.quantity}</span>
-                      <span>Price: ${item.price}</span>
+              {orderDetails?.cartItems &&
+              orderDetails.cartItems.length > 0
+                ? orderDetails.cartItems.map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 border-b pb-2"
+                    >
+                      <span>
+                        <strong>Title:</strong> {item.title}
+                      </span>
+
+                      {/* ✅ SIZE ADDED (SAFE) */}
+                      <span>
+                        <strong>Size:</strong>{" "}
+                        {item.size ? item.size : "-"}
+                      </span>
+
+                      <span>
+                        <strong>Quantity:</strong>{" "}
+                        {item.quantity}
+                      </span>
+
+                      <span>
+                        <strong>Price:</strong>{" "}
+                        ₹
+                        {(
+                          Number(item.price) *
+                          Number(item.quantity)
+                        ).toLocaleString("en-IN")}
+                      </span>
                     </li>
                   ))
                 : null}
             </ul>
           </div>
         </div>
+
+        {/* ================= SHIPPING ================= */}
         <div className="grid gap-4">
           <div className="grid gap-2">
             <div className="font-medium">Shipping Info</div>
@@ -114,6 +156,7 @@ function AdminOrderDetailsView({ orderDetails }) {
           </div>
         </div>
 
+        {/* ================= UPDATE STATUS ================= */}
         <div>
           <CommonForm
             formControls={[

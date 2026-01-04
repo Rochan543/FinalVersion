@@ -80,7 +80,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden bg-white">
+    <div className="flex flex-col bg-white min-h-screen">
       <Routes>
 
         {/* 🌍 PUBLIC */}

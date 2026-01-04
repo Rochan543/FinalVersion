@@ -49,8 +49,8 @@ const brandsWithIcon = [
 function ShoppingHome() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const { productList } = useSelector((state) => state.shopProducts);
-  const { featureImageList } = useSelector((state) => state.commonFeature);
+  const { productList = [] } = useSelector((state) => state.shopProducts);
+  const { featureImageList = [] } = useSelector((state) => state.commonFeature);
   const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
@@ -87,7 +87,6 @@ function ShoppingHome() {
     });
   }
 
-  // ✅ ADDED: Book Now from grid (NO new logic, just redirect)
   function handleBookNowFromGrid(productId) {
     navigate(`/shop/product/${productId}`);
   }
@@ -95,7 +94,7 @@ function ShoppingHome() {
   /* -------------------- EFFECTS -------------------- */
 
   useEffect(() => {
-    if (!featureImageList?.length) return;
+    if (!featureImageList.length) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featureImageList.length);
     }, 15000);
@@ -118,24 +117,27 @@ function ShoppingHome() {
   /* -------------------- UI -------------------- */
 
   return (
+    // 🔥 FIX: REMOVED overflow-x-hidden (THIS WAS BREAKING STICKY HEADER)
     <div className="flex flex-col min-h-screen">
 
       {/* ---------- HERO SLIDER ---------- */}
-      <div className="relative w-full h-[600px] overflow-hidden">
-        {featureImageList?.map((slide, index) => (
+      <div className="relative w-full h-[220px] sm:h-[350px] md:h-[500px] lg:h-[600px] overflow-hidden">
+        {featureImageList.map((slide, index) => (
           <img
             key={index}
             src={slide.image}
             className={`absolute w-full h-full object-cover transition-opacity duration-1000 ${
               index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
+            alt="Banner"
           />
         ))}
 
+        {/* LEFT ARROW */}
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 left-4 bg-white/80"
+          className="absolute top-1/2 left-3 sm:left-4 bg-white/80"
           onClick={() =>
             setCurrentSlide(
               (prev) =>
@@ -147,10 +149,11 @@ function ShoppingHome() {
           <ChevronLeftIcon />
         </Button>
 
+        {/* RIGHT ARROW */}
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 right-4 bg-white/80"
+          className="absolute top-1/2 right-3 sm:right-4 bg-white/80"
           onClick={() =>
             setCurrentSlide((prev) => (prev + 1) % featureImageList.length)
           }
@@ -160,9 +163,9 @@ function ShoppingHome() {
       </div>
 
       {/* ---------- PRODUCT GRID ---------- */}
-      <section className="py-16 bg-white">
+      <section className="py-12 sm:py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10">
             Latest Collections
           </h2>
 
@@ -176,21 +179,20 @@ function ShoppingHome() {
                 <img
                   src={product.image}
                   alt={product.title}
-                  className="w-full h-[320px] object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-[220px] sm:h-[280px] md:h-[320px] object-cover transition-transform duration-500 group-hover:scale-110"
                 />
 
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-4">
-                  <h3 className="text-white font-semibold truncate">
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-3 sm:p-4">
+                  <h3 className="text-white font-semibold truncate text-sm sm:text-base">
                     {product.title}
                   </h3>
-                  <p className="text-white font-bold">
+                  <p className="text-white font-bold text-sm sm:text-base">
                     ₹{product.price}
                   </p>
 
-                  {/* ADD TO CART + BOOK NOW */}
                   <div className="mt-3 flex gap-2">
                     <Button
-                      className="w-1/2"
+                      className="w-1/2 text-xs sm:text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleAddtoCart(product._id);
@@ -201,7 +203,7 @@ function ShoppingHome() {
 
                     <Button
                       variant="outline"
-                      className="w-1/2 bg-white text-black hover:bg-gray-100"
+                      className="w-1/2 bg-white text-black hover:bg-gray-100 text-xs sm:text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleBookNowFromGrid(product._id);

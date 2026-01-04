@@ -31,38 +31,41 @@ function AdminBookings() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Bookings</h1>
+    <div className="p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6">
+        Bookings
+      </h1>
 
       {bookings.length === 0 && (
         <p className="text-gray-500">No bookings found.</p>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* RESPONSIVE GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {bookings.map((b) => (
           <div
             key={b._id}
-            className="border rounded-xl p-5 shadow-sm bg-white"
+            className="border rounded-xl p-4 sm:p-5 shadow-sm bg-white flex flex-col justify-between"
           >
             {/* USER INFO */}
-            <div className="mb-3">
+            <div className="mb-3 break-words">
               <p className="font-semibold text-lg">
                 {b.userName}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 break-all">
                 {b.email}
               </p>
             </div>
 
             {/* PRODUCT INFO */}
-            <div className="text-sm mb-3">
+            <div className="text-sm mb-3 space-y-1">
               <p>
                 <b>Product:</b> {b.productName}
               </p>
               <p>
                 <b>Size:</b> {b.size}
               </p>
-              <p>
+              <p className="break-all">
                 <b>Booking ID:</b> {b.bookingId}
               </p>
             </div>
@@ -71,7 +74,7 @@ function AdminBookings() {
             <p className="mb-3">
               <b>Status:</b>{" "}
               <span
-                className={`capitalize px-2 py-1 rounded text-sm ${
+                className={`capitalize inline-block px-2 py-1 rounded text-xs sm:text-sm ${
                   b.status === "confirmed"
                     ? "bg-green-100 text-green-700"
                     : b.status === "contacted"
@@ -86,9 +89,9 @@ function AdminBookings() {
             </p>
 
             {/* STATUS ACTIONS */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4">
               <button
-                className="px-4 py-1 rounded bg-yellow-500 text-white text-sm"
+                className="flex-1 min-w-[90px] px-3 py-1 rounded bg-yellow-500 text-white text-xs sm:text-sm"
                 onClick={() =>
                   dispatch(
                     updateBookingStatus({
@@ -102,7 +105,7 @@ function AdminBookings() {
               </button>
 
               <button
-                className="px-4 py-1 rounded bg-green-600 text-white text-sm"
+                className="flex-1 min-w-[90px] px-3 py-1 rounded bg-green-600 text-white text-xs sm:text-sm"
                 onClick={() =>
                   dispatch(
                     updateBookingStatus({
@@ -116,7 +119,7 @@ function AdminBookings() {
               </button>
 
               <button
-                className="px-4 py-1 rounded bg-red-600 text-white text-sm"
+                className="flex-1 min-w-[90px] px-3 py-1 rounded bg-red-600 text-white text-xs sm:text-sm"
                 onClick={() =>
                   dispatch(
                     updateBookingStatus({
@@ -137,11 +140,11 @@ function AdminBookings() {
                   ✅ Payment QR already sent
                 </p>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="file"
                     accept="image/*"
-                    className="text-sm"
+                    className="text-xs sm:text-sm w-full"
                     onChange={(e) =>
                       setSelectedQr({
                         ...selectedQr,
@@ -151,7 +154,7 @@ function AdminBookings() {
                   />
 
                   <button
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded"
+                    className="w-full sm:w-auto px-3 py-1 bg-blue-600 text-white text-xs sm:text-sm rounded"
                     onClick={() => handleQrUpload(b._id)}
                   >
                     Upload QR
@@ -178,7 +181,7 @@ Thank you.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block mt-3 text-green-600 text-sm underline"
+                className="mt-3 text-green-600 text-xs sm:text-sm underline break-all"
               >
                 Send WhatsApp Payment Request
               </a>
